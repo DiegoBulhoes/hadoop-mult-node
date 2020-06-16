@@ -16,5 +16,5 @@
     src: "{{mirror_ftp}}"
     dest: "{{hadoop_base}}"
     remote_src: yes
-    owner: hadoop
-    group: hadoop
+    owner: "{{user_name}}"
+    group: "{{user_name}}"

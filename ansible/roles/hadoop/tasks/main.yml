@@ -13,7 +13,7 @@
 
 - name: Change hadoop files permission
   become: yes
-  shell: chown -R hadoop:hadoop {{hadoop_home}}
+  shell: "chown -R {{user_name}}:{{user_name}} {{hadoop_home}}"
 
 - name: Format namenode
   become: yes
