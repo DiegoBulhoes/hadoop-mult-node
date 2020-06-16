@@ -1,3 +1,4 @@
 *.log
-key/*
+key/id_rsa
+key/id_rsa.pub
 .vagrant/
