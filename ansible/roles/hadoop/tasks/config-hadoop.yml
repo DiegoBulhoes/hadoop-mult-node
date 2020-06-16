@@ -1,0 +1,95 @@
+- name: Insert env Hadoop
+  blockinfile:
+    path: /home/hadoop/.bashrc
+    block: |
+      export JAVA_HOME="{{java_home}}"
+      export HADOOP_HOME={{hadoop_home}}
+      export HADOOP_MAPRED_HOME={{hadoop_home}}
+      export HADOOP_COMMON_HOME={{hadoop_home}}
+      export HADOOP_HDFS_HOME={{hadoop_home}}
+      export HADOOP_YARN_HOME={{hadoop_home}}
+      export HADOOP_CONF_DIR={{hadoop_home}}/etc/hadoop
+
+- name: Create a directory "input"
+  file:
+    path: "{{hadoop_home}}/input"
+    state: directory
+
+- name: Copy files *.xml to input
+  shell: cp {{hadoop_home}}/etc/hadoop/*.xml {{hadoop_home}}/input
+
+- name: The unzipped conf directory to "input" directory, then finds and displays all matches for the specified regular expression. The output is saved in the "output" directory.
+  shell: "{{hadoop_home}}/bin/hadoop jar {{hadoop_home}}/share/hadoop/mapreduce/hadoop-mapreduce-examples-3.2.1.jar grep {{hadoop_home}}/input {{hadoop_home}}/output ‘dfs[a-z.]+’"
+  environment:
+    JAVA_HOME: "{{java_home}}"
+    HADOOP_HOME: "{{hadoop_home}}"
+    HADOOP_MAPRED_HOME: "{{hadoop_home}}"
+    HADOOP_COMMON_HOME: "{{hadoop_home}}"
+    HADOOP_HDFS_HOME: "{{hadoop_home}}"
+    HADOOP_YARN_HOME: "{{hadoop_home}}"
+    HADOOP_CONF_DIR: "{{hadoop_home}}/etc/hadoop"
+    HADOOP_OS_TYPE: "${HADOOP_OS_TYPE:-$(uname -s)}"
+  args:
+    executable: /bin/bash
+
+- name: Add hdfs-site.xml
+  copy:
+    src: ../files/hdfs-site.xml
+    dest: "{{hadoop_home}}/etc/hadoop/"
+
+- name: Add files template -  hadoop
+  template:
+    src: "{{item.src}}"
+    dest: "{{item.dest}}"
+  with_items:
+    - {
+        src: "../templates/hdfs-site.xml",
+        dest: "{{hadoop_home}}/etc/hadoop/hdfs-site.xml",
+      }
+    - {
+        src: "../templates/core-site.xml",
+        dest: "{{hadoop_home}}/etc/hadoop/core-site.xml",
+      }
+    - {
+        src: "../templates/hadoop-env.sh",
+        dest: "{{hadoop_home}}/etc/hadoop/hadoop-env.sh",
+      }
+    - {
+        src: "../templates/yarn-env.sh",
+        dest: "{{hadoop_home}}/etc/hadoop/yarn-env.sh",
+      }
+    - {
+        src: "../templates/mapred-site.xml",
+        dest: "{{hadoop_home}}/etc/hadoop/mapred-site.xml",
+      }
+    - {
+        src: "../templates/yarn-site.xml",
+        dest: "{{hadoop_home}}/etc/hadoop/yarn-site.xml",
+      }
+    - {
+        src: "../templates/masters",
+        dest: "{{hadoop_home}}/etc/hadoop/masters",
+      }
+    - { src: "../templates/slaves", dest: "{{hadoop_home}}/etc/hadoop/slaves" }
+    - {
+        src: "../templates/workers",
+        dest: "{{hadoop_home}}/etc/hadoop/workers",
+      }
+
+- name: Create a directory "input"
+  file:
+    path: "{{ item }}"
+    state: directory
+  loop:
+    - "{{hadoop_home}}/tmp/hdfs/namenode"
+    - "{{hadoop_home}}/tmp/hdfs/datanode"
+    - "{{hadoop_home}}/logs"
+    - /tmp/hadoop-hadoop/dfs/namenode
+    - /tmp/hadoop-hadoop/dfs/name
+    - /tmp/hadoop-hadoop/
+
+- name: Change hadoop files permission
+  shell: chown -R hadoop:hadoop {{item}}
+  loop:
+    - "{{hadoop_home}}"
+    - "/tmp/hadoop-hadoop/"

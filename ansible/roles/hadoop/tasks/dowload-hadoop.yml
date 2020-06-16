@@ -1,0 +1,20 @@
+- name: Install packages
+  become: yes
+  apt:
+    name: "{{ packages }}"
+    state: present
+    update_cache: yes
+  vars:
+    packages:
+      - vim
+      - htop
+      - openjdk-8-jdk
+
+- name: Get files - Hadoop verion 3.2.1
+  become: yes
+  unarchive:
+    src: "{{mirror_ftp}}"
+    dest: "{{hadoop_base}}"
+    remote_src: yes
+    owner: hadoop
+    group: hadoop
